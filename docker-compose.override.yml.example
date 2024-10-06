@@ -1,0 +1,19 @@
+version: '3.4'
+services:
+# This enables the netbox backup service and adds it to the netbox-docker stack.   
+  netbox-backup:
+      image: netbox-backup:latest 
+      container_name: netbox-backup
+      env_file:
+        - netbox-backup/env/netbox-backup.env  # Load environment variables from .env file
+      # Make sure to update below to match your environment.   
+      volumes:
+        - /opt/backup/netbox:/opt/backup/netbox
+        - /mnt/smb_backup:/mnt/smb_backup
+        - netbox-media-files:/opt/netbox/netbox/media
+        - netbox-reports-files:/opt/netbox/netbox/reports
+        - netbox-scripts-files:/opt/netbox/netbox/scripts
+        - ./configuration:/opt/netbox/netbox/configuration 
+      depends_on:
+        - postgres
+      restart: unless-stopped
