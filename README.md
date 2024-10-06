@@ -23,7 +23,7 @@ Clone this repository into your existing netbox-docker folder.
 
 ```bash
 cd /path/to/netbox-docker
-git clone https://github.com/yourusername/netbox-backup
+git clone https://github.com/helheimcloud/netbox-backup
 cd netbox-backup
 ```
 ### 2. Dockerfile
