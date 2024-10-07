@@ -1,11 +1,19 @@
-#!/bin/bash
+#!/bin/bash -l
 
 CRON_FILE="/etc/cron.d/netbox-backup-cron" 
 
 # Function to zero-pad minutes and hours for better formatting
 zero_pad() {
-    printf "%02d" "$1"
+    local value="$1"
+    
+    # added handle for special cases in cron expressions
+    if [[ "$value" == "*" ]] || [[ "$value" == */* ]]; then
+        echo "$value"
+    else
+        printf "%02d" "$value"
+    fi
 }
+
 
 # Function to log the cron schedule grouped by period
 log_cron_schedule() {
@@ -94,6 +102,9 @@ translate_cron_time() {
     # Handle minute
     if [[ "$minute" == "*" ]]; then
         readable_minute="00"
+    elif [[ "$minute" == */* ]]; then
+        interval=$(echo "$minute" | cut -d'/' -f2)
+        readable_minute="every $interval minutes"
     else
         readable_minute=$(zero_pad "$minute")
     fi
@@ -142,8 +153,7 @@ translate_cron_time() {
     esac
 
     # Return the final readable format
-    echo "$readable_hour:$readable_minute $readable_day_of_month $readable_month@ Weekday: $readable_day_of_week."
+    echo "$readable_hour:$readable_minute $readable_day_of_month $readable_month @ Weekday: $readable_day_of_week."
 }
 
 log_cron_schedule
-

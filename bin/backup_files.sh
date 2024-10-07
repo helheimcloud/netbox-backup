@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 
 FILES_BACKUP_CONFIG="${FILES_BACKUP_CONFIG:-/opt/netbox/netbox/configuration}"
 FILES_BACKUP_MEDIA="${FILES_BACKUP_MEDIA:-/opt/netbox/netbox/media}"
@@ -37,6 +37,9 @@ backup_files() {
     local src_path=$2
     local backup_period=$3
     local shared_backup_folder=$4
+    
+    local backup_folder="${shared_backup_folder:-$MOUNT_DIR/$backup_period/${BACKUP_PREFIX}_${timestamp}_${file_type}}"  
+    mkdir -p "$backup_folder" 
 
     local timestamp=$(date +%Y%m%d_%H%M)
     mkdir -p "$shared_backup_folder"
@@ -53,8 +56,8 @@ backup_files() {
         echo "[INFO] $(date '+%Y-%m-%d %H:%M:%S') - ${file_type} backup completed successfully: $BACKUP_TEMPDIR/$backup_file" | tee -a /var/log/cron.log
         validate_backup "$BACKUP_TEMPDIR/$backup_file"
 
-        retry_operation 3 5 rsync -avh --progress "$BACKUP_TEMPDIR/$backup_file" "$shared_backup_folder/"
-        echo "[INFO] $(date '+%Y-%m-%d %H:%M:%S') - ${file_type} backup copied to SMB in $shared_backup_folder." | tee -a /var/log/cron.log
+        retry_operation 3 5 rsync -avh --progress "$BACKUP_TEMPDIR/$backup_file" "$backup_folder/"
+        echo "[INFO] $(date '+%Y-%m-%d %H:%M:%S') - ${file_type} backup copied to SMB in $backup_folder." | tee -a /var/log/cron.log
     else
         echo "[ERROR] $(date '+%Y-%m-%d %H:%M:%S') - ${file_type} backup failed." | tee -a /var/log/cron.log
         exit 1

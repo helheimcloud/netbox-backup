@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 
 retry_operation() {
     local max_attempts=$1

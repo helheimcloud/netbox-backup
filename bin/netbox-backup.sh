@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 
 trap 'handle_error $? $LINENO' ERR
 

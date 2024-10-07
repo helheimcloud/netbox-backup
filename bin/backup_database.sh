@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 
 source /usr/local/bin/retry_operation.sh
 
@@ -14,6 +14,8 @@ handle_error() {
 backup_database() {
     local backup_period=$1
     local shared_backup_folder=$2
+    local backup_folder="${shared_backup_folder:-$MOUNT_DIR/$backup_period/${BACKUP_PREFIX}_${timestamp}_${file_type}}"  
+    mkdir -p "$backup_folder" 
     
     local timestamp=$(date +%Y%m%d_%H%M)
     local backup_file="${BACKUP_PREFIX}_${timestamp}_netbox_db.sql.gz"
@@ -29,8 +31,8 @@ backup_database() {
         echo "[INFO] $(date '+%Y-%m-%d %H:%M:%S') - Database backup completed successfully: $BACKUP_TEMPDIR/$backup_file" | tee -a /var/log/cron.log
         validate_backup "$BACKUP_TEMPDIR/$backup_file"
         
-        retry_operation 3 5 rsync -avh --progress "$BACKUP_TEMPDIR/$backup_file" "$shared_backup_folder/"
-        echo "[INFO] $(date '+%Y-%m-%d %H:%M:%S') - Database backup copied to SMB in $shared_backup_folder." | tee -a /var/log/cron.log
+        retry_operation 3 5 rsync -avh --progress "$BACKUP_TEMPDIR/$backup_file" "$backup_folder/"
+        echo "[INFO] $(date '+%Y-%m-%d %H:%M:%S') - Database backup copied to SMB in $backup_folder." | tee -a /var/log/cron.log
     else
         echo "[ERROR] $(date '+%Y-%m-%d %H:%M:%S') - Database backup failed." | tee -a /var/log/cron.log
         exit 1
