@@ -24,11 +24,11 @@ COPY bin/netbox-backup.sh /usr/local/bin/netbox-backup.sh
 COPY bin/check_health.sh /usr/local/bin/check_health.sh
 COPY bin/retry_operation.sh /usr/local/bin/retry_operation.sh
 COPY bin/setup_cron.sh /usr/local/bin/setup_cron.sh
+COPY bin/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/*.sh
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD /usr/local/bin/check_health.sh || exit 1    
 
-# Start cron in the foreground
-CMD /usr/local/bin/setup_cron.sh && /usr/local/bin/announce_schedule.sh && cron -f
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
